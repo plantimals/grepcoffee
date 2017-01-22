@@ -1,15 +1,4 @@
-package main
-
-import (
-	"fmt"
-	"github.com/jinzhu/gorm"
-	_ "github.com/mattn/go-sqlite3"
-	"github.com/plantimals/grepcoffee/models"
-	"html/template"
-	"log"
-	"net/http"
-	"time"
-)
+package models
 
 type State string
 
@@ -81,7 +70,7 @@ func NewUser(name string) *User {
 	}
 	//err = db.Create(&User{Name: name})
 	//if err != nil {
-	//	fmt.Println("caught the uniqueness")
+	//    fmt.Println("caught the uniqueness")
 	//}
 	fmt.Println("====")
 	return u
@@ -92,50 +81,4 @@ func NewBeans(name string, desc string) *Beans {
 	b.Name = name
 	b.Desc = desc
 	return b
-}
-
-func makeHandler(fn func(http.ResponseWriter, *http.Request)) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		fn(w, r)
-	}
-}
-
-func responseWriter(w http.ResponseWriter, view string) {
-	err := views.ExecuteTemplate(w, view+".html", coffees)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-}
-
-func homeHandler(w http.ResponseWriter, r *http.Request) {
-	responseWriter(w, "index")
-}
-
-// globals
-var db, err = gorm.Open("sqlite3", "coffee.db")
-var views = template.Must(template.ParseFiles("tmpl/index.html"))
-var user = NewUser("rob")
-var beans = NewBeans("deathwish", "you'll wish you were dead")
-var coffees []*Coffee
-
-func main() {
-	defer db.Close()
-	doMigrations(db)
-
-	coffees = append(coffees, NewCoffee(user, beans))
-	//coffees[0].Transition(hot, user)
-	//coffees = append(coffees, NewCoffee(user, beans))
-
-	http.HandleFunc("/", makeHandler(homeHandler))
-	//http.HandleFunc("/coffees/", makeHandler(coffeeHandler))
-	http.ListenAndServe(":8080", nil)
-}
-
-// database functions
-func doMigrations(db *gorm.DB) {
-	db.AutoMigrate(&User{})
-	db.AutoMigrate(&Coffee{})
-	db.AutoMigrate(&Beans{})
-	db.AutoMigrate(&Transition{})
-	log.Print("migration done")
 }
