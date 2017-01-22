@@ -1,5 +1,12 @@
 package models
 
+import (
+	"fmt"
+	"github.com/jinzhu/gorm"
+	_ "github.com/mattn/go-sqlite3"
+	"time"
+)
+
 type State string
 
 const (
@@ -38,7 +45,7 @@ type Coffee struct {
 	History   []*Transition
 }
 
-func NewCoffee(user *User, beans *Beans) *Coffee {
+func NewCoffee(user *User, beans *Beans, db *gorm.DB) *Coffee {
 	c := Coffee{Beans: beans, CurrState: start, History: make([]*Transition, 1)}
 	db.Create(&c)
 	fmt.Println("coffee id: " + string(c.ID))
@@ -62,7 +69,7 @@ func (c *Coffee) Transition(to State, user *User) error {
 	return nil
 }
 
-func NewUser(name string) *User {
+func NewUser(name string, db *gorm.DB) *User {
 	var u *User
 	err := db.Where(&User{Name: name}).First(u)
 	if err != nil {
