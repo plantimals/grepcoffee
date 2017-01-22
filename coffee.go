@@ -51,9 +51,9 @@ func main() {
 
 // database functions
 func doMigrations(db *gorm.DB) {
-	db.AutoMigrate(&User{})
-	db.AutoMigrate(&Coffee{})
-	db.AutoMigrate(&Beans{})
-	db.AutoMigrate(&Transition{})
+	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&models.Coffee{})
+	db.AutoMigrate(&models.Beans{})
+	db.AutoMigrate(&models.Transition{})
 	log.Print("migration done")
 }
