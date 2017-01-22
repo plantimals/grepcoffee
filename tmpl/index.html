@@ -1,0 +1,8 @@
+<html>
+  <body>
+    <h1>coffees</h1>
+    {{ with . }}<ul>{{ range . }}
+      <li>{{ .Name }}</li>{{ end }}
+    </ul>{{ end }}
+  </body>
+</html>
