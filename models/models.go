@@ -83,7 +83,7 @@ func NewUser(name string, db *gorm.DB) *User {
 	return u
 }
 
-func NewBeans(name string, desc string) *Beans {
+func NewBeans(name string, desc string, db *gorm.DB) *Beans {
 	b := new(Beans)
 	b.Name = name
 	b.Desc = desc

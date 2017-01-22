@@ -1,98 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"github.com/jinzhu/gorm"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/plantimals/grepcoffee/models"
 	"html/template"
 	"log"
 	"net/http"
-	"time"
 )
-
-type State string
-
-const (
-	start   State = "start"
-	heating State = "heating"
-	hot     State = "hot"
-	brewing State = "brewing"
-	brewed  State = "brewed"
-	carafed State = "carafed"
-)
-
-type User struct {
-	gorm.Model
-	Name string `gorm:"not null;unique"`
-}
-
-type Transition struct {
-	gorm.Model
-	From State
-	To   State
-	Time time.Time
-	User *User
-}
-
-type Beans struct {
-	gorm.Model
-	Name string `gorm:"not null;unique"`
-	Desc string
-}
-
-type Coffee struct {
-	gorm.Model
-	Name      string
-	CurrState State
-	Beans     *Beans
-	History   []*Transition
-}
-
-func NewCoffee(user *User, beans *Beans) *Coffee {
-	c := Coffee{Beans: beans, CurrState: start, History: make([]*Transition, 1)}
-	db.Create(&c)
-	fmt.Println("coffee id: " + string(c.ID))
-	//c := new(Coffee)
-	//c.Beans = beans
-	//c.CurrState = start
-	//c.History = make([]*Transition, 1)
-	//c.Transition(heating, user)
-	return &c
-}
-
-func (c *Coffee) Transition(to State, user *User) error {
-	tn := new(Transition)
-	tn.From = c.CurrState
-	tn.To = to
-	tn.Time = time.Now()
-	tn.User = user
-	c.History = append(c.History, tn)
-	c.CurrState = to
-	c.Name = user.Name + " " + string(c.CurrState) + " " + c.Beans.Name + " @ " + tn.Time.String()
-	return nil
-}
-
-func NewUser(name string) *User {
-	var u *User
-	err := db.Where(&User{Name: name}).First(u)
-	if err != nil {
-		fmt.Println("caught the missing where")
-	}
-	//err = db.Create(&User{Name: name})
-	//if err != nil {
-	//	fmt.Println("caught the uniqueness")
-	//}
-	fmt.Println("====")
-	return u
-}
-
-func NewBeans(name string, desc string) *Beans {
-	b := new(Beans)
-	b.Name = name
-	b.Desc = desc
-	return b
-}
 
 func makeHandler(fn func(http.ResponseWriter, *http.Request)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -113,16 +28,19 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 
 // globals
 var db, err = gorm.Open("sqlite3", "coffee.db")
-var views = template.Must(template.ParseFiles("tmpl/index.html"))
-var user = NewUser("rob")
-var beans = NewBeans("deathwish", "you'll wish you were dead")
-var coffees []*Coffee
+var views = template.Must(template.ParseFiles("views/index.html"))
+var user *models.User
+var beans *models.Beans
+var coffees []*models.Coffee
 
 func main() {
 	defer db.Close()
 	doMigrations(db)
 
-	coffees = append(coffees, NewCoffee(user, beans))
+	var user = models.NewUser("rob", db)
+	var beans = models.NewBeans("deathwish", "you'll wish you were dead", db)
+
+	coffees = append(coffees, models.NewCoffee(user, beans, db))
 	//coffees[0].Transition(hot, user)
 	//coffees = append(coffees, NewCoffee(user, beans))
 
