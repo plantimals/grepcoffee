@@ -7,6 +7,8 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strconv"
+	"strings"
 )
 
 func makeHandler(fn func(http.ResponseWriter, *http.Request)) http.HandlerFunc {
@@ -26,10 +28,24 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	responseWriter(w, "index")
 }
 
+func coffeeHandler(w http.ResponseWriter, r *http.Request) {
+	idStr := strings.TrimPrefix(r.URL.Path, "/coffees/")
+	log.Print("idStr: " + idStr)
+	var c models.Coffee
+	id, _ := strconv.Atoi(idStr)
+	db.Where(&models.Coffee{ID: uint(id)}).First(&c)
+	err := views.ExecuteTemplate(w, "coffee.html", c)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
 // globals
 var db, err = gorm.Open("sqlite3", "coffee.db")
 var views = template.Must(template.ParseFiles("views/index.html"))
 var user *models.User
+
+//var user2 *models.User
 var beans *models.Beans
 var coffees []*models.Coffee
 
@@ -38,14 +54,21 @@ func main() {
 	doMigrations(db)
 
 	var user = models.NewUser("rob", db)
+	//var user2 = models.NewUser("not rob", db)
+	log.Print(user)
 	var beans = models.NewBeans("deathwish", "you'll wish you were dead", db)
+	log.Print(beans.Name)
 
 	coffees = append(coffees, models.NewCoffee(user, beans, db))
-	//coffees[0].Transition(hot, user)
+	//coffees = append(coffees, models.NewCoffee(user2, beans, db))
+	//c := coffees[0]
+	//c.Transition(models.Hot, user, db)
+
 	//coffees = append(coffees, NewCoffee(user, beans))
 
+	//mux := http.NewServeMux()
 	http.HandleFunc("/", makeHandler(homeHandler))
-	//http.HandleFunc("/coffees/", makeHandler(coffeeHandler))
+	http.HandleFunc("/coffees/*", makeHandler(coffeeHandler))
 	http.ListenAndServe(":8080", nil)
 }
 

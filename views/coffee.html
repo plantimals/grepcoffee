@@ -1,0 +1,11 @@
+<html>
+  <body>
+    <h1>coffee</h1>
+    {{ .Name }}
+    state: {{ .State }}
+    {{ with .History }}<ul>{{ range . }}
+      <li>from: {{ .From }}, to: {{ .To }} user: {{ .User.Name }} time: {{ .Time.Hour() }}:{{ .Time.Minute() }} </li>{{ end }}
+    </ul>{{ end }}
+    this is crazy
+  </body>
+</html>
