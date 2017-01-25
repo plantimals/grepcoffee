@@ -2,7 +2,10 @@
   <body>
     <h1>coffees</h1>
     {{ with . }}<ul>{{ range . }}
-      <li>{{ .Name }}</li>{{ end }}
+      <li><a href="/coffees/{{ .ID }}">{{ .Name }}</a></li>{{ end }}
     </ul>{{ end }}
+    <div>
+      <button type="button">coffee += 1</button>
+    </div>
   </body>
 </html>

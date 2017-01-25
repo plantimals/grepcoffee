@@ -42,7 +42,7 @@ func coffeeHandler(w http.ResponseWriter, r *http.Request) {
 
 // globals
 var db, err = gorm.Open("sqlite3", "coffee.db")
-var views = template.Must(template.ParseFiles("views/index.html"))
+var views = template.Must(template.ParseFiles("views/index.html", "views/coffee.html"))
 var user *models.User
 
 //var user2 *models.User
@@ -60,16 +60,10 @@ func main() {
 	log.Print(beans.Name)
 
 	coffees = append(coffees, models.NewCoffee(user, beans, db))
-	//coffees = append(coffees, models.NewCoffee(user2, beans, db))
-	//c := coffees[0]
-	//c.Transition(models.Hot, user, db)
 
-	//coffees = append(coffees, NewCoffee(user, beans))
-
-	//mux := http.NewServeMux()
 	http.HandleFunc("/", makeHandler(homeHandler))
-	http.HandleFunc("/coffees/*", makeHandler(coffeeHandler))
-	http.ListenAndServe(":8080", nil)
+	http.HandleFunc("/coffees/", makeHandler(coffeeHandler))
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
 // database functions

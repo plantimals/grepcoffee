@@ -20,12 +20,12 @@ const (
 )
 
 type User struct {
-	gorm.Model
+	ID   uint   `gorm:"primary_key"`
 	Name string `gorm:"not null;unique"`
 }
 
 type Transition struct {
-	gorm.Model
+	ID   uint `gorm:"primary_key"`
 	From string
 	To   string
 	Time time.Time
@@ -33,13 +33,12 @@ type Transition struct {
 }
 
 type Beans struct {
-	gorm.Model
+	ID   uint   `gorm:"primary_key"`
 	Name string `gorm:"not null;unique"`
 	Desc string
 }
 
 type Coffee struct {
-	gorm.Model
 	ID        uint `gorm:"primary_key"`
 	Name      string
 	CurrState string
